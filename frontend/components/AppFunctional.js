@@ -1,4 +1,5 @@
-import React from 'react'
+import React from 'react';
+import SubmitEmail from './SubmitEmail';
 
 // Suggested initial states
 const initialMessage = ''
@@ -7,6 +8,7 @@ const initialSteps = 0
 const initialIndex = 4 // the index the "B" is at
 
 export default function AppFunctional(props) {
+  
   // THE FOLLOWING HELPERS ARE JUST RECOMMENDATIONS.
   // You can delete them and build your own logic from scratch.
 
