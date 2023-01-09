@@ -1,5 +1,8 @@
 import React from 'react'
 import SubmitEmail from './SubmitEmail';
+import axios from 'axios';
+
+const url =  'http://localhost:9000/api/result'
 
 // Suggested initial states
 const initialMessage = ''
@@ -19,48 +22,29 @@ export default class AppClass extends React.Component {
     email: '',
     index: 4,
     steps: 0,
-   // board:['','','','','','','','',''],
-    coordinates: ['(1,1)','(2,1)','(3,1)','(1,2)','(2,2)','(3,2)','(1,3)','(2,3)','(3,3)'],
+    board:['','','','','','','','',''],
+    //coordinates: (2,2),
+    x: 2,
+    y:2
   }
   // THE FOLLOWING HELPERS ARE JUST RECOMMENDATIONS.
   // You can delete them and build your own logic from scratch.
 
-  getCoordinates(index) {
-      if (index === 0){
-        return '(1,1)'
-      }else if(index=== 1){
-        return '(2,1)'
-      }else if(index ===2) {
-        return '(3,1)'
-      }else if(index === 3) {
-        return '(1,2)'
-      }else if(index === 4) {
-        return '(2,2)'
-      }else if(index=== 5) {
-        return '(3,2)'
-      }else if(index=== 6) {
-        return '(1,3)'
-      }else if(index=== 7) {
-        return '(2,3)'
-      }else if(index===8) {
-        return '(3,3)'
-      }
+  getCoordinates= () => {
+    let coordinates = '';
+    if (this.state.index){
+      // do ternarys here?
+    }
+    this.setState({
+      ...this.state,
+      index: this.state.index ===0 ? (1,1) :'' || this.state.index === 1? (2,1) : ''|| this.state.index === 2 ? (3,1) : '' || this.state.index === 3 ? (1,2) :'' || this.state.index === 4 ? (2,2) : '' || this.state.index ===5 ? (3,2) : '' || this.state.index === 6 ? (1,3) : '' || this.state.index ===7? (2,3):''|| this.state.index===8 ? (3,3):'',
+      //index= board.indexOf('B') 
+    })
+    
     // It it not necessary to have a state to track the coordinates.
     // It's enough to know what index the "B" is at, to be able to calculate them.
   }
-  getMessage = (event) => {
-    this.setState({
-      ...this.state,
-      message: 'You cannot go up'
-    })
-    //console.log(event.target.value);
-
-   // this.setState({ message: 'You cannot go up'});
-    // It it not necessary to have a state to track the "Coordinates (2, 2)" message for the user.
-    // You can use the `getXY` helper above to obtain the coordinates, and then `getXYMessage`
-    // returns the fully constructed string.
   
-  }
   
   reset = () =>{
     console.log('reset clicked');
@@ -92,7 +76,7 @@ export default class AppClass extends React.Component {
        index: this.state.index>2 ? this.state.index -3 : this.state.index,
        message: this.state.index<3? 'You can\'t go up': '',
        steps: this.state.steps + 1, 
-       coordinates: this.getCoordinates(this.state.coordinates)
+       coordinates: this.state.index===0 ? (1,1) : '',
        
     })
     // This event handler can use the helper above to obtain a new index for the "B",
@@ -128,11 +112,41 @@ export default class AppClass extends React.Component {
     });
   }
  
-  onChange = (event) => {
+  onChange = (evt)=> {
     //evt.preventDefault();
-    console.log(event.target.value)
+    const { value } = evt.target
+    //console.log(event.target.value)
     // You will need this to update the value of the input.
+    this.setState({
+      ...this.state, email: value
+    })
   }
+  postEmail = () => {
+    axios.post(url, {
+      name: this.state.email,
+      steps: this.state.steps,
+
+    })
+      .then(res => {
+        debugger
+        this.setState({ email: [res.data, ...this.state.email]});
+        this.setState({ steps: ''});
+      })
+      .catch(err => {
+        this.setState({ ...this.state, error:err.response.data.message})
+      })
+  }
+  /*
+  fetchEmail = () => {
+    axios.get(url)
+      .then(res => {
+        this.setState({ ...this.state, email:res.data})
+      })
+      .catch(err => {
+        this.setState({ ...this.state, error:err.response.data.message})
+      })
+  }
+  */
   handleSubmit = () => {
     this.setState({
 
@@ -140,7 +154,11 @@ export default class AppClass extends React.Component {
   }
   onSubmit = (e) => {
     e.preventDefault();
+    this.postEmail()
     console.log('submit');
+    this.state({
+      message: 'please enter valid email address'
+    })
     // Use a POST request to send a payload to the server.
   }
   render() {
@@ -148,7 +166,7 @@ export default class AppClass extends React.Component {
     return (
       <div id="wrapper" className={className}>          
         <div className="info">
-          <h3 id="coordinates">Coordinates {this.state.index}</h3>
+          <h3 id="coordinates">Coordinates {this.state.coordinates}</h3>
           <h3 id="steps">You moved {this.state.steps} times</h3>
         </div>
         <div id="grid">
@@ -171,7 +189,7 @@ export default class AppClass extends React.Component {
           <button onClick={this.reset} id="reset">reset</button>
         </div>
         <form>
-          <input onChange={this.onChange}id="email" type="email" placeholder="type email"></input>
+          <input value={this.state.email} onChange={this.onChange}id="email" type="email" placeholder="type email"></input>
           <input onClick={this.onSubmit}id="submit" type="submit"></input>
         </form>
       </div>
